@@ -1,15 +1,12 @@
 # Bitcoin python svelte playground
 ![alt text](playground.png)
-## Install
+## Install on your Bitcoin lightning node
 ### Backend
 ```
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+chmod +x create_backend.sh
+./create_backend.sh
 ```
-And follow these instructions:
-https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/python.md
+
 ### Frontend
 ```
 npm install
