@@ -1,4 +1,5 @@
 # Bitcoin python svelte playground
+![alt text](playground.png)
 ## Install
 ### Backend
 ```
@@ -21,4 +22,3 @@ npm run dev -- --port 3456
 ### start backend (inside "backend" directory)
 `uvicorn test:app --reload --port=8000`
 
-![alt text](playground.png)
