@@ -1,5 +1,13 @@
 # Bitcoin python svelte playground
+
+
+
+
 ![alt text](playground.png)
+## Where to start
+You should have a bitcoin lighning node (LND) up and running.
+This repo assumes that you set it up similiar to the 
+[raspibolt guide](https://raspibolt.org/)
 ## Install on your Bitcoin lightning node
 ### Backend
 ```
