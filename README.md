@@ -9,6 +9,11 @@ You should have a bitcoin lighning node (LND) up and running.
 This repo assumes that you set it up similiar to the 
 [raspibolt guide](https://raspibolt.org/)
 ## Install on your Bitcoin lightning node
+### Clone Repo (e.g in admin user home dir)
+```
+git clone https://github.com/zynos/bitcoin-python-svelte-playground.git
+cd bitcoin-python-svelte-playground/
+```
 ### Backend
 ```
 chmod +x create_backend.sh
