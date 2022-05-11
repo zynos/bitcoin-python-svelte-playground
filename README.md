@@ -32,3 +32,6 @@ npm run dev -- --port 3456
 ### start backend (inside "backend" directory)
 `uvicorn test:app --reload --port=8000`
 
+
+## Tutorials:
+- [Generate a lightning invoice with python](tutorials/01_generate_qr_code_lightning_invoice_python_svelte.md)
