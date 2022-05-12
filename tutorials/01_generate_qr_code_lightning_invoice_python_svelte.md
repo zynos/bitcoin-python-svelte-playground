@@ -47,7 +47,7 @@ Here, the field `payment_request` contains a string which could look like this:
 payment_request = "lnbc100u1p383wdppp52d9rgd2vkmv355jw35vd5q0k3cc80v9yvxvgkt9cf50ez7tyxqxsdp2f3hkxctv94fx2cnpd3skucm995cnqvpsxqk4xct5wvcqzpgxqrrsssp5ql0de9uzejf2dj0kcknc5thtp7hdr4ekeyc6l6u36ctz3squ0sjs9qyyssq26vjm03jtzh28teh7pkvth2x3pwdp96zejdwwyuwkpr5vljw3c8rhy9t205f84pydpwe5dajd9898fvlu4cpuxf0gmjd7lyg50f3gcqqn89xd9"
 ```
 This string can be read by every lightning wallet and can be easily transformed into a QR code by every string to QR code converter.
-## 3 Create QR code
+## 3 - Create QR code
 In python this could be done with the 
 [qrcode](hhttps://pypi.org/project/qrcode/) package.
 

@@ -1,3 +1,4 @@
 fastapi[all]
 python-bitcoinrpc
 qrcode[pil]
+grpcio-tools

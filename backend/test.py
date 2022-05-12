@@ -1,3 +1,4 @@
+from base64 import decode
 from cgi import print_form
 from sys import path_importer_cache
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
@@ -8,13 +9,6 @@ import qrcode
 import json
 
 path_to_btc_cookie = "/home/admin/.bitcoin/.cookie"
-
-
-def read_auth_cookie() -> str:
-    with open(path_to_btc_cookie, "r") as f:
-        cookie = f.read()
-    return cookie
-
 use_electrum = False
 if use_electrum:
     # electrum server port
@@ -22,22 +16,11 @@ if use_electrum:
 else:
     # bitcoin cli port
     PORT = 8332
-combined_auth = read_auth_cookie()
-# rpc_user and rpc_password are set in the bitcoin.conf file
-connect_string = f"http://{combined_auth}@127.0.0.1:{PORT}"
 
-onnect_string = f"http://{combined_auth}@127.0.0.1:{PORT}"
-rpc_connection = AuthServiceProxy(connect_string)
-mem_transactions = rpc_connection.getrawmempool(True)
-keys = list(mem_transactions.keys())
-detail_transactions = []
-print("current transactions", len(mem_transactions))
-commands = [["getrawtransaction", id, True] for id in mem_transactions]
-try:
-    detail_transactions = rpc_connection.batch_(commands)
-except:
-    print("fetching mempool failed")
-    pass
+def read_auth_cookie() -> str:
+    with open(path_to_btc_cookie, "r") as f:
+        cookie = f.read()
+    return cookie
 
 origins = [
     "*"
@@ -104,11 +87,31 @@ def get_invoice_qr_code(sat_amount: int):
     invoice_dict["payment_request_qr"] = image_str
     return invoice_dict
 
+
 @app.get("/invoice_paid/{add_index}")
 def check_for_payment(add_index: int):
     invoice_dict = get_invoice(add_index)
     print(invoice_dict)
     if "settled" in invoice_dict.keys() and invoice_dict["settled"]:
-        return {"settled":True,"quoute":"An apple a day keeps the doctor away"}
+        return {"settled": True, "quoute": "An apple a day keeps the doctor away"}
     else:
-        return {"settled":False}
+        return {"settled": False}
+
+
+@app.get("/get_dummy_invoice")
+def get_invoice_qr_code():
+    import base64
+    from io import BytesIO
+
+    buffered = BytesIO()
+
+    pay_req = "lnbc100u1p383wdppp52d9rgd2vkmv355jw35vd5q0k3cc80v9yvxvgkt9cf50ez7tyxqxsdp2f3hkxctv94fx2cnpd3skucm995cnqvpsxqk4xct5wvcqzpgxqrrsssp5ql0de9uzejf2dj0kcknc5thtp7hdr4ekeyc6l6u36ctz3squ0sjs9qyyssq26vjm03jtzh28teh7pkvth2x3pwdp96zejdwwyuwkpr5vljw3c8rhy9t205f84pydpwe5dajd9898fvlu4cpuxf0gmjd7lyg50f3gcqqn89xd9"
+    invoice_dict = {"payment_request": pay_req}
+    qr_image = qrcode.make(invoice_dict["payment_request"])
+    qr_image.save(buffered, format="png")
+    img_str = base64.b64encode(buffered.getvalue())
+    decoded = img_str.decode("ascii")
+    print(img_str)
+    print(decoded)
+    invoice_dict["payment_request_qr"] = "data:image/png;base64,"+decoded
+    return invoice_dict

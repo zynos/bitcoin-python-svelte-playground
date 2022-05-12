@@ -2,6 +2,8 @@
   import JSONTree from 'svelte-json-tree';
   import { onMount } from "svelte";
   import QRCode from "./QRJS.svelte"
+  import Dummy_qr from './Dummy_qr.svelte';
+
 	let sat_mount = 10;
   let invoice_data = {};
   let payment_request = false;
@@ -11,14 +13,17 @@
   let interval = null;
 
 	let value;
-    onMount(async () => {
-    await fetch("http://localhost:8000/")
-      .then(r => r.json())
-      .then(data => {
-          console.log(data);
-        value = data;
-      });
-      });
+ 
+	//onMount(async () => {
+   // await fetch("http://localhost:8000/")
+     // .then(r => r.json())
+    //  .then(data => {
+    //      console.log(data);
+    //    value = data;
+    //  });
+   //   });
+	
+    
 
     
   async function loadData() {
@@ -63,9 +68,11 @@
 <h1>You pay {sat_mount} satoshis</h1>
 <input bind:value={sat_mount}>
 <button on:click={loadData}>Get Invoice QR</button>
-
+<br>
 <button on:click={checkInvoicePayed}>Check Invoice paid</button>
 <input bind:value={settled}>
+<br>
+<Dummy_qr/>
 
 {#if payment_request}
 <h3>
@@ -78,3 +85,4 @@
 
 <h1>{message_after_payment}</h1>
 {/if}
+
