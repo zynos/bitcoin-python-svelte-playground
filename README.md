@@ -1,9 +1,13 @@
 # Bitcoin python svelte playground
+## Download the mempool as JSON
+![mempool](mempool.png)
 
+## Create a Dummy Invoice (with QR) in the backend
+![dummy invoice](dummyqr.png)
 
+## Create a Real Invoice (with QR) in the backend
+![create invoice](createInvoice.png)
 
-
-![alt text](playground.png)
 ## Where to start
 You should have a bitcoin lighning node (LND) up and running.
 This repo assumes that you set it up similiar to the 
