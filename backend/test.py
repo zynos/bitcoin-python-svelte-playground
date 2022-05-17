@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from create_invoice import create_invoice, get_invoice
 import qrcode
 import json
+import base64
+from io import BytesIO
 
 path_to_btc_cookie = "/home/admin/.bitcoin/.cookie"
 use_electrum = False
@@ -80,11 +82,15 @@ async def root():
 
 @app.get("/invoice/{sat_amount}")
 def get_invoice_qr_code(sat_amount: int):
+    buffered = BytesIO()
     invoice_dict = create_invoice(sat_amount)
     print(invoice_dict)
     qr_image = qrcode.make(invoice_dict["paymentRequest"])
-    image_str = json.dumps(qr_image.tobytes().decode("latin1"))
-    invoice_dict["payment_request_qr"] = image_str
+    qr_image.save(buffered, format="png")
+    img_str = base64.b64encode(buffered.getvalue())
+    decoded = img_str.decode("ascii")
+    decoded = "data:image/png;base64,"+decoded
+    invoice_dict["payment_request_qr"] = decoded
     return invoice_dict
 
 
@@ -100,8 +106,7 @@ def check_for_payment(add_index: int):
 
 @app.get("/get_dummy_invoice")
 def get_invoice_qr_code():
-    import base64
-    from io import BytesIO
+    
 
     buffered = BytesIO()
 
