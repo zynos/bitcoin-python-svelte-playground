@@ -1,3 +1,4 @@
+import uvicorn
 from base64 import decode
 from cgi import print_form
 from sys import path_importer_cache
@@ -9,6 +10,7 @@ import qrcode
 import json
 import base64
 from io import BytesIO
+import time
 
 path_to_btc_cookie = "/home/admin/.bitcoin/.cookie"
 use_electrum = False
@@ -19,10 +21,12 @@ else:
     # bitcoin cli port
     PORT = 8332
 
+
 def read_auth_cookie() -> str:
     with open(path_to_btc_cookie, "r") as f:
         cookie = f.read()
     return cookie
+
 
 origins = [
     "*"
@@ -54,24 +58,49 @@ async def root():
     # rpc_user and rpc_password are set in the bitcoin.conf file
     connect_string = f"http://{combined_auth}@127.0.0.1:{PORT}"
     rpc_connection = AuthServiceProxy(connect_string)
-    mem_transactions = rpc_connection.getrawmempool(True)
+    start = time.time()
+    verbose = True
+    mem_transactions = rpc_connection.getrawmempool(verbose)
+    print("mempool fetch took", time.time()-start)
     detail_transactions = []
     print("current transactions", len(mem_transactions))
-    commands = [["getrawtransaction", id, True]
-                for id in mem_transactions.keys()]
-    detail_transactions = rpc_connection.batch_(commands)
+    if verbose:
+        tx_ids = [id for id in mem_transactions.keys()]
+    else:
+        tx_ids = mem_transactions
+
+    invalid_trxs = []
+    for id in tx_ids[:100]:
+        try:
+            transaction = rpc_connection.getrawtransaction(id, True)
+            detail_transactions.append(transaction)
+
+        except:
+            invalid_id = id
+            invalid_trx = mem_transactions[invalid_id]
+            invalid_trxs.append(invalid_trx)
+
+    # commands = [["getrawtransaction", id, True]
+    #             for id in mem_transactions.keys()]
+
+    # start = time.time()
+    # detail_transactions = rpc_connection.batch_(commands)
+    # print("mempool detail fetch took",time.time()-start)
     detail_transactions_dict = {el["txid"]: el for el in detail_transactions}
 
     compress_trx = []
-    for key, value in mem_transactions.items():
+    for key, value in detail_transactions_dict.items():
         # might encounter bitcoinrpc.authproxy.JSONRPCException: -5: No such mempool or blockchain transaction.
         try:
-            fee_in_sats = float(value["fee"]) * 100000000
-            btc_moved = sum([el["value"]
-                            for el in detail_transactions_dict[key]["vout"]])
-            compressed = {key: {"fee": fee_in_sats,
-                                "vsize": value["vsize"], "btc_moved": btc_moved}}
-            compress_trx.append(compressed)
+            if verbose:
+                fee_in_sats = float(mem_transactions[key]["fee"]) * 100000000
+                vsize = value["vsize"]
+                sat_per_vbyte = round(fee_in_sats / vsize, 1)
+                btc_moved = sum([el["value"]
+                                for el in detail_transactions_dict[key]["vout"]])
+                compressed = {key: {"fee": fee_in_sats, "sat_per_vbyte": sat_per_vbyte,
+                                    "vsize": vsize, "btc_moved": btc_moved}}
+                compress_trx.append(compressed)
         except:
             pass
 
@@ -106,7 +135,6 @@ def check_for_payment(add_index: int):
 
 @app.get("/get_dummy_invoice")
 def get_invoice_qr_code():
-    
 
     buffered = BytesIO()
 
@@ -120,3 +148,7 @@ def get_invoice_qr_code():
     print(decoded)
     invoice_dict["payment_request_qr"] = "data:image/png;base64,"+decoded
     return invoice_dict
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
